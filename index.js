@@ -22,14 +22,36 @@ module.exports = function(app) {
 
   plugin.start = function(props) {
     debug("starting");
-    timer = setInterval(_ => {
+    function setDeltas() {
+      let totalArea = 0;
+      let activeArea = 0;
       const values = (props.sails || []).map(sail => {
+        // No id in the sail as used in Signal K
         const sailClone = JSON.parse(JSON.stringify(sail));
         delete sailClone.id;
+
+        // Calculate into sail area available
+        totalArea += sail.area;
+        if (sail.active) {
+          // Calculate into active sail area
+          if (sail.reducedState && sail.reducedState.furledRatio) {
+            activeArea += sail.area - (sail.area * sail.reducedState.furledRatio);
+          } else {
+            activeArea += sail.area;
+          }
+        }
+
         return {
           path: "sails." + sail.id,
           value: sailClone,
         };
+      });
+      values.push({
+        path: 'sails.area',
+        value: {
+          total: totalArea,
+          active: activeArea,
+        },
       });
       app.handleMessage(pluginId, {
         updates: [
@@ -38,7 +60,9 @@ module.exports = function(app) {
           }
         ]
       });
-    }, props.deltaInterval * 1000);
+    }
+    timer = setInterval(setDeltas, props.deltaInterval * 1000);
+    setDeltas();
     debug("started");
   };
 
