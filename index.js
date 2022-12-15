@@ -26,9 +26,10 @@ module.exports = function(app) {
       let totalArea = 0;
       let activeArea = 0;
       const values = (props.sails || []).map(sail => {
-        // No id in the sail as used in Signal K
+        // No id or description in the sail as used in Signal K
         const sailClone = JSON.parse(JSON.stringify(sail));
         delete sailClone.id;
+        delete sailClone.description;
 
         // Calculate into sail area available
         totalArea += sail.area;
@@ -101,6 +102,11 @@ module.exports = function(app) {
             name: {
               type: "string",
               title: "Name"
+            },
+            description: {
+              type: "string",
+              title: "Description",
+              'ui:widget': 'textarea',
             },
             type: {
               type: "string",
