@@ -135,6 +135,7 @@ module.exports = function(app) {
             active: {
               type: 'boolean',
               title: 'Whether the sail is currently in use',
+              default: false,
             },
             area: {
               type: "number",
