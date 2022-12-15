@@ -100,7 +100,7 @@ module.exports = function(app) {
             },
             maximumWind: {
               type: "number",
-              title: "The minimum wind speed this sail can be used with, in m/s",
+              title: "The maximum wind speed this sail can be used with, in m/s",
             },
             reducedState: {
               type: 'object',
