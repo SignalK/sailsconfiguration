@@ -24,9 +24,11 @@ module.exports = function(app) {
     debug("starting");
     timer = setInterval(_ => {
       const values = (props.sails || []).map(sail => {
+        const sailClone = JSON.parse(JSON.stringify(sail));
+        delete sailClone.id;
         return {
           path: "sails." + sail.id,
-          value: sail.state > 0 ? sail.state : null
+          value: sailClone,
         };
       });
       app.handleMessage(pluginId, {
