@@ -67,44 +67,60 @@ module.exports = function(app) {
           properties: {
             id: {
               type: "string",
-              title: "Id"
+              title: "Id",
+              pattern: "(^[a-zA-Z0-9]+$)",
             },
             name: {
               type: "string",
               title: "Name"
             },
-            description: {
-              type: "string",
-              title: "Description"
-            },
             type: {
               type: "string",
               enum: ["main", "gyb", "spinnaker", "codezero"]
             },
+            material: {
+              type: 'string',
+              title: 'Material',
+            },
+            brand: {
+              type: 'string',
+              title: 'Brand',
+            },
+            active: {
+              type: 'boolean',
+              title: 'Whether the sail is currently in use',
+            },
             area: {
               type: "number",
-              title: "Area"
+              title: "Sail area in square meters"
             },
-            state: {
+            minimumWind: {
               type: "number",
-              title: "State"
+              title: "The minimum wind speed this sail can be used with, in m/s",
             },
-            states: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  name: {
-                    type: "string",
-                    title: "State name"
-                  },
-                  value: {
-                    type: "number",
-                    title: "Corresponding fraction of sail open 0..1"
-                  }
-                }
-              }
-            }
+            maximumWind: {
+              type: "number",
+              title: "The minimum wind speed this sail can be used with, in m/s",
+            },
+            reducedState: {
+              type: 'object',
+              properties: {
+                reduced: {
+                  type: 'boolean',
+                  title: 'Whether the sail is reduced or not',
+                },
+                reefs: {
+                  type: 'number',
+                  title: 'Number of reefs set, 0 means full',
+                  default: 0,
+                },
+                furledRatio: {
+                  type: 'number',
+                  title: 'Ratio of sail reduction, 0 means full and 1 is completely furled in',
+                  default: 0,
+                },
+              },
+            },
           }
         }
       }
