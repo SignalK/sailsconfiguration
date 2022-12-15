@@ -58,11 +58,13 @@ module.exports = function(app) {
     required: ["deltaInterval"],
     properties: {
       deltaInterval: {
+        title: 'How often should this plugin update the state, in seconds',
         type: "number",
         default: 60
       },
       sails: {
         type: "array",
+        title: "Sail inventory",
         items: {
           type: "object",
           required: ["id", "name", "type", "area"],
@@ -78,7 +80,19 @@ module.exports = function(app) {
             },
             type: {
               type: "string",
-              enum: ["main", "gyb", "spinnaker", "codezero"]
+              title: "Sail type",
+              enum: [
+                "staysail",
+                "headsail",
+                "jib",
+                "genoa",
+                "spinnaker",
+                "gennaker",
+                "mainsail",
+                "lug",
+                "mizzen",
+                "steadying sail",
+              ],
             },
             material: {
               type: 'string',
@@ -105,6 +119,7 @@ module.exports = function(app) {
               title: "The maximum wind speed this sail can be used with, in m/s",
             },
             reducedState: {
+              title: "Reefing state",
               type: 'object',
               properties: {
                 reduced: {
