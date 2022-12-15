@@ -49,7 +49,7 @@ module.exports = function(app) {
   plugin.id = pluginId;
   plugin.name = "Sails Configuration";
   plugin.description =
-    "Plugin that allows you to define your server's sails inventory and configuration";
+    "Plugin that allows you to define your vessel's sails inventory and configuration";
 
   plugin.schema = {
     type: "object",
