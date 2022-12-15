@@ -50,11 +50,12 @@ module.exports = function(app) {
         };
       });
       values.push({
-        path: 'sails.area',
-        value: {
-          total: totalArea,
-          active: activeArea,
-        },
+        path: 'sails.area.total',
+        value: totalArea,
+      });
+      values.push({
+        path: 'sails.area.active',
+        value: activeArea,
       });
       app.handleMessage(pluginId, {
         updates: [
