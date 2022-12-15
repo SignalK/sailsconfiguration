@@ -1,13 +1,14 @@
 {
   "name": "@signalk/sailsconfiguration",
   "version": "0.0.1",
-  "description": "Signal K Sailsconfiguration plugin",
+  "description": "Signal K plugin for setting the vessel's sail inventory and configuration",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "signalk-node-server-plugin"
+    "signalk-node-server-plugin",
+    "signalk-category-utility"
   ],
   "author": "teppo.kurki@iki.fi",
   "license": "ISC",
