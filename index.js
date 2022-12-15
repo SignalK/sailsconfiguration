@@ -43,7 +43,7 @@ module.exports = function(app) {
         }
 
         return {
-          path: "sails." + sail.id,
+          path: "sails.inventory." + sail.id,
           value: sailClone,
         };
       });
