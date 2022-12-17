@@ -22,12 +22,40 @@ module.exports = function(app) {
 
   plugin.start = function(props) {
     debug("starting");
-    timer = setInterval(_ => {
+    function setDeltas() {
+      let totalArea = 0;
+      let activeArea = 0;
+      let activeSails = [];
       const values = (props.sails || []).map(sail => {
+        // No id or description in the sail as used in Signal K
+        const sailClone = JSON.parse(JSON.stringify(sail));
+        delete sailClone.id;
+        delete sailClone.description;
+
+        // Calculate into sail area available
+        totalArea += sail.area;
+        if (sail.active) {
+          activeSails.push(sail.name);
+          // Calculate into active sail area
+          if (sail.reducedState && sail.reducedState.furledRatio) {
+            activeArea += sail.area - (sail.area * sail.reducedState.furledRatio);
+          } else {
+            activeArea += sail.area;
+          }
+        }
+
         return {
-          path: "sails." + sail.id,
-          value: sail.state > 0 ? sail.state : null
+          path: "sails.inventory." + sail.id,
+          value: sailClone,
         };
+      });
+      values.push({
+        path: 'sails.area.total',
+        value: totalArea,
+      });
+      values.push({
+        path: 'sails.area.active',
+        value: activeArea,
       });
       app.handleMessage(pluginId, {
         updates: [
@@ -36,7 +64,14 @@ module.exports = function(app) {
           }
         ]
       });
-    }, props.deltaInterval * 1000);
+      if (activeArea > 0) {
+        app.setPluginStatus(`${activeArea}m2 sail area active with ${activeSails.join(', ')}`);
+      } else {
+        app.setPluginStatus('No sails set as active.');
+      }
+    }
+    timer = setInterval(setDeltas, props.deltaInterval * 1000);
+    setDeltas();
     debug("started");
   };
 
@@ -49,25 +84,28 @@ module.exports = function(app) {
   plugin.id = pluginId;
   plugin.name = "Sails Configuration";
   plugin.description =
-    "Plugin that allows you to define your server's sails inventory and configuration";
+    "Plugin that allows you to define your vessel's sails inventory and configuration";
 
   plugin.schema = {
     type: "object",
     required: ["deltaInterval"],
     properties: {
       deltaInterval: {
+        title: 'How often should this plugin update the state, in seconds',
         type: "number",
         default: 60
       },
       sails: {
         type: "array",
+        title: "Sail inventory",
         items: {
           type: "object",
           required: ["id", "name", "type", "area"],
           properties: {
             id: {
               type: "string",
-              title: "Id"
+              title: "Id",
+              pattern: "(^[a-zA-Z0-9]+$)",
             },
             name: {
               type: "string",
@@ -75,36 +113,70 @@ module.exports = function(app) {
             },
             description: {
               type: "string",
-              title: "Description"
+              title: "Description",
+              'ui:widget': 'textarea',
             },
             type: {
               type: "string",
-              enum: ["main", "gyb", "spinnaker", "codezero"]
+              title: "Sail type",
+              enum: [
+                "staysail",
+                "headsail",
+                "jib",
+                "genoa",
+                "spinnaker",
+                "gennaker",
+                "mainsail",
+                "lug",
+                "mizzen",
+                "steadying sail",
+              ],
+            },
+            material: {
+              type: 'string',
+              title: 'Material',
+            },
+            brand: {
+              type: 'string',
+              title: 'Brand',
+            },
+            active: {
+              type: 'boolean',
+              title: 'Whether the sail is currently in use',
+              default: false,
             },
             area: {
               type: "number",
-              title: "Area"
+              title: "Sail area in square meters"
             },
-            state: {
+            minimumWind: {
               type: "number",
-              title: "State"
+              title: "The minimum wind speed this sail can be used with, in m/s",
             },
-            states: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  name: {
-                    type: "string",
-                    title: "State name"
-                  },
-                  value: {
-                    type: "number",
-                    title: "Corresponding fraction of sail open 0..1"
-                  }
-                }
-              }
-            }
+            maximumWind: {
+              type: "number",
+              title: "The maximum wind speed this sail can be used with, in m/s",
+            },
+            reducedState: {
+              title: "Reefing state",
+              type: 'object',
+              properties: {
+                reduced: {
+                  type: 'boolean',
+                  title: 'Whether the sail is reduced or not',
+                },
+                reefs: {
+                  type: 'number',
+                  title: 'Number of reefs set, 0 means full',
+                  default: 0,
+                },
+                furledRatio: {
+                  type: 'number',
+                  title: 'Ratio of sail reduction, 0 means full and 1 is completely furled in',
+                  default: 0,
+                },
+              },
+            },
           }
         }
       }
