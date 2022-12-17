@@ -14,11 +14,11 @@
  */
 
 const pluginId = "sailsconfiguration";
-const debug = require("debug")(pluginId);
 
 module.exports = function(app) {
   let plugin = {};
   let timer;
+  const debug = app.debug
 
   plugin.start = function(props) {
     debug("starting");
