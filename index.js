@@ -157,6 +157,18 @@ module.exports = function(app) {
               type: "number",
               title: "The maximum wind speed this sail can be used with, in m/s",
             },
+            reefs: {
+              type: "array",
+              title: "Reefed sail areas",
+              description: "In descending order, leave empty if no fixed reefs",
+              items: {
+                type: "number",
+              }
+            },
+            continuousReefing: {
+              type: "boolean",
+              title: "The sail can be reefed continuously, with no discreet steps"
+            },
             reducedState: {
               title: "Reefing state",
               type: 'object',
