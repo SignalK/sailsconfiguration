@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const openAPI = require('./openapi.json');
 
 const pluginId = "sailsconfiguration";
 
@@ -193,6 +194,104 @@ module.exports = function(app) {
         }
       }
     }
+  };
+
+  plugin.registerWithRouter = function(router) {
+    router.get('/sails', function(req, res) {
+      res.contentType('application/json');
+      const { configuration } = app.readPluginOptions();
+      const result = configuration.sails.map(function(sail) {
+        return {
+          id: sail.id,
+          name: sail.name,
+          active: sail.active,
+          reducedState: sail.reducedState,
+        };
+      });
+      res.send(JSON.stringify(result));
+    });
+    router.put('/sails', function(req, res) {
+      res.contentType('application/json');
+      const { configuration } = app.readPluginOptions();
+      let failed = false;
+      req.body.forEach(function (sail) {
+        if (failed) {
+          return;
+        }
+        const sailInConfig = configuration.sails.find(function (s) {
+          if (s.id === sail.id) {
+            return true;
+          }
+          return false;
+        });
+        if (!sailInConfig) {
+          // Trying to set state to unknown sail, fail
+          failed = true;
+          res.sendStatus(400);
+          return;
+        }
+        sailInConfig.active = sail.active;
+        sailInConfig.reducedState = sail.reducedState;
+      });
+      if (failed) {
+        return;
+      }
+      app.savePluginOptions(configuration, function (err) {
+        if (err) {
+          res.sendStatus(500);
+          return;
+        }
+        res.sendStatus(200);
+      });
+    });
+    router.post('/set/:id', function(req, res) {
+      res.contentType('application/json');
+      const { configuration } = app.readPluginOptions();
+      const sailInConfig = configuration.sails.find(function (s) {
+        if (s.id === req.params.id) {
+          return true;
+        }
+        return false;
+      });
+      if (!sailInConfig) {
+        res.sendStatus(404);
+        return;
+      }
+      sailInConfig.active = req.body;
+      app.savePluginOptions(configuration, function (err) {
+        if (err) {
+          res.sendStatus(500);
+          return;
+        }
+        res.sendStatus(200);
+      });
+    });
+    router.post('/reef/:id', function(req, res) {
+      res.contentType('application/json');
+      const { configuration } = app.readPluginOptions();
+      const sailInConfig = configuration.sails.find(function (s) {
+        if (s.id === req.params.id) {
+          return true;
+        }
+        return false;
+      });
+      if (!sailInConfig) {
+        res.sendStatus(404);
+        return;
+      }
+      sailInConfig.reducedState = req.body;
+      app.savePluginOptions(configuration, function (err) {
+        if (err) {
+          res.sendStatus(500);
+          return;
+        }
+        res.sendStatus(200);
+      });
+    });
+  };
+
+  plugin.getOpenApi = function() {
+    return openAPI;
   };
 
   return plugin;
