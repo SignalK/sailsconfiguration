@@ -52,7 +52,11 @@ paths:
         content:
           application/json:
             schema:
-              type: boolean
+              type: object
+              additionalProperties: false
+              properties:
+                active:
+                  type: boolean
       responses:
         '200':
           description: Successful operation

@@ -257,7 +257,7 @@ module.exports = function(app) {
         res.sendStatus(404);
         return;
       }
-      sailInConfig.active = req.body;
+      sailInConfig.active = req.body.active;
       app.savePluginOptions(configuration, function (err) {
         if (err) {
           res.sendStatus(500);
