@@ -27,7 +27,8 @@ module.exports = function(app) {
       let totalArea = 0;
       let activeArea = 0;
       let activeSails = [];
-      const values = (props.sails || []).map(sail => {
+      const { configuration } = app.readPluginOptions();
+      const values = (configuration.sails || []).map(sail => {
         // No id or description in the sail as used in Signal K
         const sailClone = JSON.parse(JSON.stringify(sail));
         delete sailClone.id;
