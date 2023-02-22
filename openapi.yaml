@@ -9,7 +9,7 @@ tags:
   - name: sails
     description: Sail management
 paths:
-  /plugins/sailsconfiguration/sails:
+  /sails:
     get:
       tags:
       - sails
@@ -35,7 +35,7 @@ paths:
       responses:
         '200':
           description: Successful operation
-  /plugins/sailsconfiguration/set/{id}:
+  /set/{id}:
     post:
       tags:
       - sails
@@ -56,7 +56,7 @@ paths:
       responses:
         '200':
           description: Successful operation
-  /plugins/sailsconfiguration/reef/{id}:
+  /reef/{id}:
     post:
       tags:
       - sails
