@@ -4,6 +4,8 @@
   "description": "Signal K plugin for setting the vessel's sail inventory and configuration",
   "main": "index.js",
   "scripts": {
+    "build": "js-yaml openapi.yaml > openapi.json",
+    "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -12,5 +14,7 @@
   ],
   "author": "teppo.kurki@iki.fi",
   "license": "ISC",
-  "dependencies": {}
+  "devDependencies": {
+    "js-yaml": "^4.1.0"
+  }
 }
