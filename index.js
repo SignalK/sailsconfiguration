@@ -175,10 +175,6 @@ module.exports = function(app) {
               title: "Reefing state",
               type: 'object',
               properties: {
-                reduced: {
-                  type: 'boolean',
-                  title: 'Whether the sail is reduced or not',
-                },
                 reefs: {
                   type: 'number',
                   title: 'Number of reefs set, 0 means full',
