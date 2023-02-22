@@ -20,58 +20,58 @@ module.exports = function(app) {
   let plugin = {};
   let timer;
   const debug = app.debug
+  function setDeltas() {
+    let totalArea = 0;
+    let activeArea = 0;
+    let activeSails = [];
+    const { configuration } = app.readPluginOptions();
+    const values = (configuration.sails || []).map(sail => {
+      // No id or description in the sail as used in Signal K
+      const sailClone = JSON.parse(JSON.stringify(sail));
+      delete sailClone.id;
+      delete sailClone.description;
+
+      // Calculate into sail area available
+      totalArea += sail.area;
+      if (sail.active) {
+        activeSails.push(sail.name);
+        // Calculate into active sail area
+        if (sail.reducedState && sail.reducedState.furledRatio) {
+          activeArea += sail.area - (sail.area * sail.reducedState.furledRatio);
+        } else {
+          activeArea += sail.area;
+        }
+      }
+
+      return {
+        path: "sails.inventory." + sail.id,
+        value: sailClone,
+      };
+    });
+    values.push({
+      path: 'sails.area.total',
+      value: totalArea,
+    });
+    values.push({
+      path: 'sails.area.active',
+      value: activeArea,
+    });
+    app.handleMessage(pluginId, {
+      updates: [
+        {
+          values: values
+        }
+      ]
+    });
+    if (activeArea > 0) {
+      app.setPluginStatus(`${activeArea}m2 sail area active with ${activeSails.join(', ')}`);
+    } else {
+      app.setPluginStatus('No sails set as active.');
+    }
+  }
 
   plugin.start = function(props) {
     debug("starting");
-    function setDeltas() {
-      let totalArea = 0;
-      let activeArea = 0;
-      let activeSails = [];
-      const { configuration } = app.readPluginOptions();
-      const values = (configuration.sails || []).map(sail => {
-        // No id or description in the sail as used in Signal K
-        const sailClone = JSON.parse(JSON.stringify(sail));
-        delete sailClone.id;
-        delete sailClone.description;
-
-        // Calculate into sail area available
-        totalArea += sail.area;
-        if (sail.active) {
-          activeSails.push(sail.name);
-          // Calculate into active sail area
-          if (sail.reducedState && sail.reducedState.furledRatio) {
-            activeArea += sail.area - (sail.area * sail.reducedState.furledRatio);
-          } else {
-            activeArea += sail.area;
-          }
-        }
-
-        return {
-          path: "sails.inventory." + sail.id,
-          value: sailClone,
-        };
-      });
-      values.push({
-        path: 'sails.area.total',
-        value: totalArea,
-      });
-      values.push({
-        path: 'sails.area.active',
-        value: activeArea,
-      });
-      app.handleMessage(pluginId, {
-        updates: [
-          {
-            values: values
-          }
-        ]
-      });
-      if (activeArea > 0) {
-        app.setPluginStatus(`${activeArea}m2 sail area active with ${activeSails.join(', ')}`);
-      } else {
-        app.setPluginStatus('No sails set as active.');
-      }
-    }
     timer = setInterval(setDeltas, props.deltaInterval * 1000);
     setDeltas();
     debug("started");
@@ -264,6 +264,7 @@ module.exports = function(app) {
           res.sendStatus(500);
           return;
         }
+        setDeltas();
         res.sendStatus(200);
       });
     });
@@ -274,6 +275,7 @@ module.exports = function(app) {
         if (s.id === req.params.id) {
           return true;
         }
+        setDeltas();
         return false;
       });
       if (!sailInConfig) {
@@ -286,6 +288,7 @@ module.exports = function(app) {
           res.sendStatus(500);
           return;
         }
+        setDeltas();
         res.sendStatus(200);
       });
     });
