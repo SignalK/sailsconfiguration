@@ -238,6 +238,7 @@ module.exports = function(app) {
           res.sendStatus(500);
           return;
         }
+        setDeltas();
         res.sendStatus(200);
       });
     });
@@ -271,7 +272,6 @@ module.exports = function(app) {
         if (s.id === req.params.id) {
           return true;
         }
-        setDeltas();
         return false;
       });
       if (!sailInConfig) {
