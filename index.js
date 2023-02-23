@@ -38,6 +38,9 @@ module.exports = function(app) {
         // Calculate into active sail area
         if (sail.reducedState && sail.reducedState.furledRatio) {
           activeArea += sail.area - (sail.area * sail.reducedState.furledRatio);
+        } else if (sail.reducedState && sail.reducedState.reefs) {
+          const reefedArea = sail.reefs[sail.reducedState.reefs - 1] || sail.area;
+          activeArea += reefedArea;
         } else {
           activeArea += sail.area;
         }
