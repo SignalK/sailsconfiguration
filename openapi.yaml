@@ -26,7 +26,7 @@ paths:
       tags:
       - sails
       summary: Set current sails state
-      description: Update the current state of sails on the vessel
+      description: Update the current state of sails on the vessel in one go
       requestBody:
         content:
           application/json:
