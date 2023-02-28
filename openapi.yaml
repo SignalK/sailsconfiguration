@@ -35,8 +35,8 @@ paths:
       responses:
         '200':
           description: Successful operation
-  /set/{id}:
-    post:
+  /sails/{id}/active:
+    put:
       tags:
       - sails
       summary: Set a sail active or inactive
@@ -54,14 +54,15 @@ paths:
             schema:
               type: object
               additionalProperties: false
+              required: [value]
               properties:
-                active:
+                value:
                   type: boolean
       responses:
         '200':
           description: Successful operation
-  /reef/{id}:
-    post:
+  /sails/{id}/reducedState:
+    put:
       tags:
       - sails
       summary: Reef a sail

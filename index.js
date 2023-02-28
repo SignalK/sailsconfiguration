@@ -245,7 +245,7 @@ module.exports = function(app) {
         res.sendStatus(200);
       });
     });
-    router.post('/set/:id', function(req, res) {
+    router.put('/sails/:id/active', function(req, res) {
       res.contentType('application/json');
       const { configuration } = app.readPluginOptions();
       const sailInConfig = configuration.sails.find(function (s) {
@@ -258,7 +258,7 @@ module.exports = function(app) {
         res.sendStatus(404);
         return;
       }
-      sailInConfig.active = req.body.active;
+      sailInConfig.active = req.body.value;
       app.savePluginOptions(configuration, function (err) {
         if (err) {
           res.sendStatus(500);
@@ -268,7 +268,7 @@ module.exports = function(app) {
         res.sendStatus(200);
       });
     });
-    router.post('/reef/:id', function(req, res) {
+    router.put('/sails/:id/reducedState', function(req, res) {
       res.contentType('application/json');
       const { configuration } = app.readPluginOptions();
       const sailInConfig = configuration.sails.find(function (s) {
