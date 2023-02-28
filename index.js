@@ -218,12 +218,7 @@ module.exports = function(app) {
         if (failed) {
           return;
         }
-        const sailInConfig = configuration.sails.find(function (s) {
-          if (s.id === sail.id) {
-            return true;
-          }
-          return false;
-        });
+        const sailInConfig = configuration.sails.find((s) => s.id === sail.id);
         if (!sailInConfig) {
           // Trying to set state to unknown sail, fail
           failed = true;
@@ -232,6 +227,11 @@ module.exports = function(app) {
         }
         sailInConfig.active = sail.active;
         sailInConfig.reducedState = sail.reducedState;
+      });
+      // Deactivate any saild _not_ provided in payload
+      const payloadIds = req.body.map((s) => s.id);
+      configuration.sails.filter((s) => !payloadIds.includes(s.id)).forEach((s) => {
+        s.active = false;
       });
       if (failed) {
         return;
