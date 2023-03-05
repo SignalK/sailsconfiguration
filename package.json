@@ -10,7 +10,8 @@
   },
   "keywords": [
     "signalk-node-server-plugin",
-    "signalk-category-utility"
+    "signalk-category-utility",
+    "signalk-webapp"
   ],
   "author": "teppo.kurki@iki.fi",
   "license": "ISC",

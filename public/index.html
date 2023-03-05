@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="description" content="Webpage description goes here" />
+  <meta charset="utf-8">
+  <title>Change_me</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="author" content="">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+</head>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  
+  .flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 30px;
+    text-align: center;
+  }
+  
+  .flex-item {
+    background-color: #f1f1f1;
+    padding: 10px;
+    flex: 50%;
+  }
+
+  @media (max-width: 800px) {
+    .flex-item {
+      flex: 100%;
+    }
+  }
+
+  @media (min-width: 1600px) {
+    .flex-item {
+      flex: 25%;
+    }
+  }
+
+  .break {
+    flex-basis: 100%;
+    height: 0;
+  }
+  </style>
+<body>
+  
+<div id="container" class="flex-container">
+</div>
+</div>
+
+<script>
+  const c = document.getElementById("container")
+  const insertElement = (type, text) => {
+    const e = document.createElement(type)
+    e.append(document.createTextNode(text))
+    e.classList.add('flex-item')
+    c.appendChild(e)
+  }
+  const insertBreak = () => {
+    const b = document.createElement('div')
+    b.classList.add('break')
+    c.appendChild(b)
+  }
+
+  fetch('/signalk/v1/api/vessels/self/sails/inventory', {
+    credentials: 'include'
+  })
+    .then(r => r.json())
+    .then(d => Object.entries(d).map(([id, d]) => {d.value.id = id; return d.value}))
+    .then(d => {console.log(d); return d})
+    .then(d => d.forEach(sail => {
+      const sailName = document.createElement('div')
+      sailName.append(document.createTextNode(sail.name))
+      c.appendChild(sailName)
+      insertBreak()
+
+      if (sail.reefs && sail.reefs.length > 0) {
+        insertElement('button', `FULL sail`)
+        sail.reefs.forEach((reef, n) => {
+          insertElement('button', `Reef ${n+1}`)
+        })
+      }
+      if (sail.continuousReefing) {
+        insertElement('button', `Full sail`)
+        ;[80,60,40,20].forEach((reef) => insertElement('button', `Sail ${reef}% open`))
+      }
+
+      insertElement('button', 'Sail DOWN')
+      insertBreak()
+    }))
+</script>
+
+</body>
+</html>
