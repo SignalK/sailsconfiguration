@@ -1,6 +1,6 @@
 {
   "name": "@signalk/sailsconfiguration",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Signal K plugin for setting the vessel's sail inventory and configuration",
   "main": "index.js",
   "scripts": {
