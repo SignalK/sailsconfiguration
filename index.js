@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const openAPI = require('./openapi.json');
 
 const pluginId = "sailsconfiguration";
 
@@ -19,57 +20,61 @@ module.exports = function(app) {
   let plugin = {};
   let timer;
   const debug = app.debug
+  function setDeltas() {
+    let totalArea = 0;
+    let activeArea = 0;
+    let activeSails = [];
+    const { configuration } = app.readPluginOptions();
+    const values = (configuration.sails || []).map(sail => {
+      // No id or description in the sail as used in Signal K
+      const sailClone = JSON.parse(JSON.stringify(sail));
+      delete sailClone.id;
+      delete sailClone.description;
+
+      // Calculate into sail area available
+      totalArea += sail.area;
+      if (sail.active) {
+        activeSails.push(sail.name);
+        // Calculate into active sail area
+        if (sail.reducedState && sail.reducedState.furledRatio) {
+          activeArea += sail.area - (sail.area * sail.reducedState.furledRatio);
+        } else if (sail.reducedState && sail.reducedState.reefs) {
+          const reefedArea = sail.reefs[sail.reducedState.reefs - 1] || sail.area;
+          activeArea += reefedArea;
+        } else {
+          activeArea += sail.area;
+        }
+      }
+
+      return {
+        path: "sails.inventory." + sail.id,
+        value: sailClone,
+      };
+    });
+    values.push({
+      path: 'sails.area.total',
+      value: totalArea,
+    });
+    values.push({
+      path: 'sails.area.active',
+      value: activeArea,
+    });
+    app.handleMessage(pluginId, {
+      updates: [
+        {
+          values: values
+        }
+      ]
+    });
+    if (activeArea > 0) {
+      app.setPluginStatus(`${activeArea}m2 sail area active with ${activeSails.join(', ')}`);
+    } else {
+      app.setPluginStatus('No sails set as active.');
+    }
+  }
 
   plugin.start = function(props) {
     debug("starting");
-    function setDeltas() {
-      let totalArea = 0;
-      let activeArea = 0;
-      let activeSails = [];
-      const values = (props.sails || []).map(sail => {
-        // No id or description in the sail as used in Signal K
-        const sailClone = JSON.parse(JSON.stringify(sail));
-        delete sailClone.id;
-        delete sailClone.description;
-
-        // Calculate into sail area available
-        totalArea += sail.area;
-        if (sail.active) {
-          activeSails.push(sail.name);
-          // Calculate into active sail area
-          if (sail.reducedState && sail.reducedState.furledRatio) {
-            activeArea += sail.area - (sail.area * sail.reducedState.furledRatio);
-          } else {
-            activeArea += sail.area;
-          }
-        }
-
-        return {
-          path: "sails.inventory." + sail.id,
-          value: sailClone,
-        };
-      });
-      values.push({
-        path: 'sails.area.total',
-        value: totalArea,
-      });
-      values.push({
-        path: 'sails.area.active',
-        value: activeArea,
-      });
-      app.handleMessage(pluginId, {
-        updates: [
-          {
-            values: values
-          }
-        ]
-      });
-      if (activeArea > 0) {
-        app.setPluginStatus(`${activeArea}m2 sail area active with ${activeSails.join(', ')}`);
-      } else {
-        app.setPluginStatus('No sails set as active.');
-      }
-    }
     timer = setInterval(setDeltas, props.deltaInterval * 1000);
     setDeltas();
     debug("started");
@@ -173,10 +178,6 @@ module.exports = function(app) {
               title: "Reefing state",
               type: 'object',
               properties: {
-                reduced: {
-                  type: 'boolean',
-                  title: 'Whether the sail is reduced or not',
-                },
                 reefs: {
                   type: 'number',
                   title: 'Number of reefs set, 0 means full',
@@ -193,6 +194,107 @@ module.exports = function(app) {
         }
       }
     }
+  };
+
+  plugin.registerWithRouter = function(router) {
+    router.get('/sails', function(req, res) {
+      res.contentType('application/json');
+      const { configuration } = app.readPluginOptions();
+      const result = configuration.sails.map(function(sail) {
+        return {
+          id: sail.id,
+          name: sail.name,
+          active: sail.active,
+          reducedState: sail.reducedState,
+        };
+      });
+      res.send(JSON.stringify(result));
+    });
+    router.put('/sails', function(req, res) {
+      res.contentType('application/json');
+      const { configuration } = app.readPluginOptions();
+      let failed = false;
+      req.body.forEach(function (sail) {
+        if (failed) {
+          return;
+        }
+        const sailInConfig = configuration.sails.find((s) => s.id === sail.id);
+        if (!sailInConfig) {
+          // Trying to set state to unknown sail, fail
+          failed = true;
+          res.sendStatus(400);
+          return;
+        }
+        sailInConfig.active = sail.active;
+        sailInConfig.reducedState = sail.reducedState;
+      });
+      // Deactivate any saild _not_ provided in payload
+      const payloadIds = req.body.map((s) => s.id);
+      configuration.sails.filter((s) => !payloadIds.includes(s.id)).forEach((s) => {
+        s.active = false;
+      });
+      if (failed) {
+        return;
+      }
+      app.savePluginOptions(configuration, function (err) {
+        if (err) {
+          res.sendStatus(500);
+          return;
+        }
+        setDeltas();
+        res.sendStatus(200);
+      });
+    });
+    router.put('/sails/:id/active', function(req, res) {
+      res.contentType('application/json');
+      const { configuration } = app.readPluginOptions();
+      const sailInConfig = configuration.sails.find(function (s) {
+        if (s.id === req.params.id) {
+          return true;
+        }
+        return false;
+      });
+      if (!sailInConfig) {
+        res.sendStatus(404);
+        return;
+      }
+      sailInConfig.active = req.body.value;
+      app.savePluginOptions(configuration, function (err) {
+        if (err) {
+          res.sendStatus(500);
+          return;
+        }
+        setDeltas();
+        res.sendStatus(200);
+      });
+    });
+    router.put('/sails/:id/reducedState', function(req, res) {
+      res.contentType('application/json');
+      const { configuration } = app.readPluginOptions();
+      const sailInConfig = configuration.sails.find(function (s) {
+        if (s.id === req.params.id) {
+          return true;
+        }
+        return false;
+      });
+      if (!sailInConfig) {
+        res.sendStatus(404);
+        return;
+      }
+      sailInConfig.reducedState = req.body;
+      app.savePluginOptions(configuration, function (err) {
+        if (err) {
+          res.sendStatus(500);
+          return;
+        }
+        setDeltas();
+        res.sendStatus(200);
+      });
+    });
+  };
+
+  plugin.getOpenApi = function() {
+    return openAPI;
   };
 
   return plugin;

@@ -1,0 +1,122 @@
+openapi: 3.0.3
+info:
+  title: Signal K Sails configuration
+  description: API for managing the state of the vessel's sails with Signal K
+  version: 0.1.0
+servers:
+  - url: http://localhost:3000
+tags:
+  - name: sails
+    description: Sail management
+paths:
+  /sails:
+    get:
+      tags:
+      - sails
+      summary: Get current sails state
+      description: Read the current state of sails on the vessel
+      responses:
+        '200':
+          description: Current state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sails'
+    put:
+      tags:
+      - sails
+      summary: Set current sails state
+      description: Update the current state of sails on the vessel in one go
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/sails'
+      responses:
+        '200':
+          description: Successful operation
+  /sails/{id}/active:
+    put:
+      tags:
+      - sails
+      summary: Set a sail active or inactive
+      description: Update the active state of a single sail
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: '(^[a-zA-Z0-9]+$)'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [value]
+              properties:
+                value:
+                  type: boolean
+      responses:
+        '200':
+          description: Successful operation
+  /sails/{id}/reducedState:
+    put:
+      tags:
+      - sails
+      summary: Reef a sail
+      description: Update the reefing state of a single sail
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: '(^[a-zA-Z0-9]+$)'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/reducedState'
+      responses:
+        '200':
+          description: Successful operation
+components:
+  schemas:
+    reducedState:
+      type: object
+      additionalProperties: false
+      oneOf:
+      - properties:
+          reefs:
+            type: number
+            default: 0
+            minimum: 0
+      - properties:
+          furledRatio:
+            type: number
+            default: 0
+            minimum: 0
+            maximum: 1
+    sail:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          pattern: '(^[a-zA-Z0-9]+$)'
+          example: main
+        name:
+          type: string
+          example: Main sail
+          readOnly: true
+        active:
+          type: boolean
+          example: false
+        reducedState:
+          $ref: '#/components/schemas/reducedState'
+    sails:
+      type: array
+      items:
+        $ref: '#/components/schemas/sail'
