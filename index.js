@@ -221,10 +221,9 @@ module.exports = function(app) {
       res.contentType('application/json');
       let { configuration } = app.readPluginOptions();
       if (!configuration) {
-        configuration = {};
-      }
-      if (!configuration.sails) {
-        configuration.sails = [];
+        // If there is no sails inventory, there is no valid payload we can accept
+        res.sendStatus(400);
+        return;
       }
       let failed = false;
       req.body.forEach(function (sail) {
