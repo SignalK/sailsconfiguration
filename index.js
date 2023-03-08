@@ -20,11 +20,20 @@ module.exports = function(app) {
   let plugin = {};
   let timer;
   const debug = app.debug
+
+  function getSafeConfiguration() {
+    const { configuration } = app.readPluginOptions();
+    if (!configuration) {
+      return { sails: []}
+    }
+    return configuration
+  }
+
   function setDeltas() {
     let totalArea = 0;
     let activeArea = 0;
     let activeSails = [];
-    const { configuration } = app.readPluginOptions();
+    const configuration = getSafeConfiguration();
     const values = (configuration.sails || []).map(sail => {
       // No id or description in the sail as used in Signal K
       const sailClone = JSON.parse(JSON.stringify(sail));
@@ -199,7 +208,7 @@ module.exports = function(app) {
   plugin.registerWithRouter = function(router) {
     router.get('/sails', function(req, res) {
       res.contentType('application/json');
-      const { configuration } = app.readPluginOptions();
+      const configuration = getSafeConfiguration()
       const result = configuration.sails.map(function(sail) {
         return {
           id: sail.id,
@@ -212,8 +221,8 @@ module.exports = function(app) {
     });
     router.put('/sails', function(req, res) {
       res.contentType('application/json');
-      const { configuration } = app.readPluginOptions();
       let failed = false;
+      const configuration = getSafeConfiguration()
       req.body.forEach(function (sail) {
         if (failed) {
           return;
@@ -247,7 +256,7 @@ module.exports = function(app) {
     });
     router.put('/sails/:id/active', function(req, res) {
       res.contentType('application/json');
-      const { configuration } = app.readPluginOptions();
+      const configuration = getSafeConfiguration()
       const sailInConfig = configuration.sails.find(function (s) {
         if (s.id === req.params.id) {
           return true;
@@ -270,7 +279,7 @@ module.exports = function(app) {
     });
     router.put('/sails/:id/reducedState', function(req, res) {
       res.contentType('application/json');
-      const { configuration } = app.readPluginOptions();
+      const configuration = getSafeConfiguration()
       const sailInConfig = configuration.sails.find(function (s) {
         if (s.id === req.params.id) {
           return true;
