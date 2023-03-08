@@ -24,7 +24,10 @@ module.exports = function(app) {
     let totalArea = 0;
     let activeArea = 0;
     let activeSails = [];
-    const { configuration } = app.readPluginOptions();
+    let { configuration } = app.readPluginOptions();
+    if (!configuration) {
+      configuration = {};
+    }
     const values = (configuration.sails || []).map(sail => {
       // No id or description in the sail as used in Signal K
       const sailClone = JSON.parse(JSON.stringify(sail));
@@ -200,6 +203,10 @@ module.exports = function(app) {
     router.get('/sails', function(req, res) {
       res.contentType('application/json');
       const { configuration } = app.readPluginOptions();
+      if (!configuration) {
+        res.send(JSON.stringify([]));
+        return;
+      }
       const result = configuration.sails.map(function(sail) {
         return {
           id: sail.id,
@@ -212,7 +219,13 @@ module.exports = function(app) {
     });
     router.put('/sails', function(req, res) {
       res.contentType('application/json');
-      const { configuration } = app.readPluginOptions();
+      let { configuration } = app.readPluginOptions();
+      if (!configuration) {
+        configuration = {};
+      }
+      if (!configuration.sails) {
+        configuration.sails = [];
+      }
       let failed = false;
       req.body.forEach(function (sail) {
         if (failed) {
@@ -248,6 +261,10 @@ module.exports = function(app) {
     router.put('/sails/:id/active', function(req, res) {
       res.contentType('application/json');
       const { configuration } = app.readPluginOptions();
+      if (!configuration) {
+        res.sendStatus(404);
+        return;
+      }
       const sailInConfig = configuration.sails.find(function (s) {
         if (s.id === req.params.id) {
           return true;
@@ -271,6 +288,10 @@ module.exports = function(app) {
     router.put('/sails/:id/reducedState', function(req, res) {
       res.contentType('application/json');
       const { configuration } = app.readPluginOptions();
+      if (!configuration) {
+        res.sendStatus(404);
+        return;
+      }
       const sailInConfig = configuration.sails.find(function (s) {
         if (s.id === req.params.id) {
           return true;
