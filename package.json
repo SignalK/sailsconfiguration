@@ -1,10 +1,10 @@
 {
   "name": "@signalk/sailsconfiguration",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Signal K plugin for setting the vessel's sail inventory and configuration",
   "main": "index.js",
   "scripts": {
-    "build": "js-yaml openapi.yaml > openapi.json",
+    "build": "tsc validator.ts && js-yaml openapi.yaml > openapi.json",
     "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -17,5 +17,8 @@
   "license": "ISC",
   "devDependencies": {
     "js-yaml": "^4.1.0"
+  },
+  "dependencies": {
+    "fluentvalidation-ts": "^5.0.0"
   }
 }

@@ -1,3 +1,5 @@
 public_src/
 src/
 webpack.config.js
+validator.ts
+openapi.yaml

@@ -2,9 +2,9 @@ openapi: 3.0.3
 info:
   title: Signal K Sails configuration
   description: API for managing the state of the vessel's sails with Signal K
-  version: 0.1.0
+  version: 0.2.0
 servers:
-  - url: http://localhost:3000
+  - url: http://localhost:3000/plugins/sailsconfiguration
 tags:
   - name: sails
     description: Sail management
@@ -15,6 +15,23 @@ paths:
       - sails
       summary: Get current sails state
       description: Read the current state of sails on the vessel
+      responses:
+        '200':
+          description: Current state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sails'
+    post:
+      tags:
+      - sails
+      summary: Manage current sails configuration
+      description: Add or Update sail in the current state on the vessel in one go
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/sailsconfiguration'
       responses:
         '200':
           description: Current state
@@ -105,7 +122,7 @@ components:
       properties:
         id:
           type: string
-          pattern: '(^[a-zA-Z0-9]+$)'
+          pattern: '(^[a-zA-Z0-9-]+$)'
           example: main
         name:
           type: string
@@ -116,7 +133,63 @@ components:
           example: false
         reducedState:
           $ref: '#/components/schemas/reducedState'
+    sailconfiguration:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          pattern: '^[a-zA-Z0-9-]+$'
+          example: genoa
+        name:
+          type: string
+          example: Genoa
+        description:
+          type: string
+          example: 110% overlapping genoa with rolling furler
+        type:
+          type: string
+          enum:
+            - mainsail
+            - jib
+            - genoa
+            - spinnaker
+            - gennaker
+            - staysail
+            - headsail
+            - lug
+            - mizzen
+            - steadying sail
+            - other
+          example: genoa
+        material:
+          type: string
+          example: Dacron+
+        brand:
+          type: string
+          example: Elvström
+        active:
+          type: boolean
+          example: true
+        area:
+          type: number
+          example: 60.9
+        minimumWind:
+          type: number
+          example: 0
+        maximumWind:
+          type: number
+          example: 15
+        continuousReefing:
+          type: boolean
+          example: true
+        reducedState:
+          $ref: '#/components/schemas/reducedState'          
     sails:
       type: array
       items:
         $ref: '#/components/schemas/sail'
+    sailsconfiguration:
+      type: array
+      items:
+        $ref: '#/components/schemas/sailconfiguration'

@@ -33,8 +33,13 @@ jspm_packages
 # Optional npm cache directory
 .npm
 
+# Development environment
+.vscode
+
 # Optional REPL history
 .node_repl_history
 package-lock.json
 
+# Ignore compiled TypeScript & JSON output
+validator.js
 openapi.json
