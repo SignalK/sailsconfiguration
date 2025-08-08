@@ -90,7 +90,7 @@ module.exports = function(app) {
       if (state.reefs >= 0)
         sail.reducedState.furledRatio = undefined;
     }
-    debug(`setting state of ${sail.name} to ${sail.reducedState}`);
+    debug(`setting state of ${sail.name} to ${JSON.stringify(sail.reducedState)}`);
   }
 
   plugin.start = function(props) {
