@@ -3,6 +3,10 @@
   "version": "1.2.0",
   "description": "Signal K plugin for setting the vessel's sail inventory and configuration",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SignalK/sailsconfiguration.git"
+  },
   "scripts": {
     "build": "js-yaml openapi.yaml > openapi.json",
     "prepublishOnly": "npm run build",
