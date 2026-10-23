@@ -25,4 +25,4 @@ jobs:
         uses: ncipollo/release-action@v1.21.0
         with:
           body: ${{steps.github_release.outputs.changelog}}
-          artifacts: "signalk-to-influxdb2*.tgz"
+          artifacts: "signalk-sailsconfiguration-*.tgz"
