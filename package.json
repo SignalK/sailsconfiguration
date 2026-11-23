@@ -20,7 +20,8 @@
   "author": "teppo.kurki@iki.fi",
   "license": "ISC",
   "devDependencies": {
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "typescript": "^5.9.2"
   },
   "dependencies": {
     "fluentvalidation-ts": "^5.0.0"
