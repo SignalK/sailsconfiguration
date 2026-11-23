@@ -8,7 +8,7 @@
     "url": "git+https://github.com/SignalK/sailsconfiguration.git"
   },
   "scripts": {
-    "build": "js-yaml openapi.yaml > openapi.json",
+    "build": "tsc validator.ts && js-yaml openapi.yaml > openapi.json",
     "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -20,6 +20,10 @@
   "author": "teppo.kurki@iki.fi",
   "license": "ISC",
   "devDependencies": {
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "fluentvalidation-ts": "^5.0.0"
   }
 }
